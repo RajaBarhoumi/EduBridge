@@ -1,6 +1,8 @@
-package pages;
+package ui.auth;
 
-import Database.UserManager;
+import models.User;
+import service.UserServiceClient;
+import ui.professor.ProfessorDashboard;
 
 import javax.swing.*;
 import java.awt.*;
@@ -44,23 +46,56 @@ public class LoginScreen extends JFrame {
         signUpLink.setHorizontalAlignment(SwingConstants.CENTER);
         signUpLink.setAlignmentX(Component.CENTER_ALIGNMENT);
         signUpLink.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        signUpLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         loginBtn.addActionListener(e -> {
             String email = emailField.getText();
             String password = new String(passwordField.getPassword());
 
-            UserManager userManager = new UserManager();
-            //boolean authenticated = userManager.login(email, password, role);
-            /*
-            if (authenticated) {
-                JOptionPane.showMessageDialog(this, "Login successful!");
-                // TODO: Open dashboard or next screen
-            } else {
-                JOptionPane.showMessageDialog(this, "Invalid credentials. Please try again.");
-            }
+            // Initialize the service client and attempt login
+            UserServiceClient serviceClient = new UserServiceClient();
+            User user = serviceClient.login(email, password);
 
-             */
+            if (user != null) {
+                // Print role for debugging
+                System.out.println("ROLE RECEIVED: [" + user.getRole() + "]");
+
+                String userRole = String.valueOf(user.getRole());
+                if (userRole != null) {
+                    switch (userRole.toLowerCase()) {
+                        case "student":
+                            System.out.println("Logged in as " + user.getEmail());
+                            // new StudentDashboardScreen().setVisible(true); // Uncomment when implemented
+                            break;
+                        case "professor":
+                            System.out.println("Logged in as " + user.getEmail());
+                            SwingUtilities.invokeLater(() -> {
+                                new ProfessorDashboard(user.getId()).setVisible(true);
+                            });
+                            break;
+                        default:
+                            System.out.println("Unknown role: " + userRole);
+                            JOptionPane.showMessageDialog(this, "Unknown role: " + userRole, "Error", JOptionPane.ERROR_MESSAGE);
+                            return; // Exit early so we don't dispose
+                    }
+                    dispose(); // Close the login screen only if role is valid
+                } else {
+                    System.out.println("Role is null.");
+                    JOptionPane.showMessageDialog(this, "User role is not defined.", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                // Login failed
+                JOptionPane.showMessageDialog(this, "Invalid email or password.", "Login Failed", JOptionPane.ERROR_MESSAGE);
+            }
         });
+
+        signUpLink.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                dispose();
+                new SignUpScreen(role).setVisible(true);
+            }
+        });
+
 
         signUpLink.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {

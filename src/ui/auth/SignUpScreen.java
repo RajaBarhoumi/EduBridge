@@ -1,6 +1,6 @@
-package pages;
+package ui.auth;
 
-import Database.UserManager;
+import service.UserServiceClient;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,19 +45,34 @@ public class SignUpScreen extends JFrame {
         loginLink.setHorizontalAlignment(SwingConstants.CENTER);
         loginLink.setAlignmentX(Component.CENTER_ALIGNMENT);
         loginLink.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
-
+        loginLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         registerBtn.addActionListener(e -> {
             String name = nameField.getText();
             String email = emailField.getText();
             String password = new String(passwordField.getPassword());
 
-            // Call insertUser from UserManager to insert the user into the database
-            UserManager userManager = new UserManager();
-            int result = userManager.insertUser(name, email, password, this.role);
-            if (result > 0) {
-                JOptionPane.showMessageDialog(this, "Registration successful!");
+            if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill all fields!", "Input Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            UserServiceClient userServiceClient = new UserServiceClient();
+            boolean success = userServiceClient.register(name, email, password, this.role);
+
+            if (success) {
+                JOptionPane.showMessageDialog(this, "Registration successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                dispose();
+                new LoginScreen(role).setVisible(true);
             } else {
-                JOptionPane.showMessageDialog(this, "Registration failed. Try again.");
+                JOptionPane.showMessageDialog(this, "Registration failed. Try again later.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+
+        loginLink.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                dispose();
+                new LoginScreen(role).setVisible(true);
             }
         });
 

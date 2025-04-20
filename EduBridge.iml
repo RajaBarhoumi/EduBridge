@@ -7,10 +7,34 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="EduBridgeCommon" exported="" />
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../TP1/libs/mysql-connector-java-8.0.30.jar!/" />
+          <root url="jar://$USER_HOME$/Downloads/jfreechart-1.0.19/jfreechart-1.0.19/jfreechart-1.0.19-demo.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" exported="" name="libs" level="project" />
+    <orderEntry type="library" exported="" name="libs (2)" level="project" />
+    <orderEntry type="library" exported="" name="libs (3)" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/jfreechart-1.0.19-demo.jar!/" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="jar://$MODULE_DIR$/libs/jcommon-1.0.23-javadoc.jar!/" />
+        </JAVADOC>
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/jfreechart-1.0.19.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

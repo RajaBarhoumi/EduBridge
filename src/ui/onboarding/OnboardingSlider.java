@@ -1,4 +1,6 @@
-package pages;
+package ui.onboarding;
+
+import ui.auth.SignUpScreen;
 
 import javax.swing.*;
 import java.awt.*;
@@ -124,8 +126,8 @@ public class OnboardingSlider extends JFrame {
         hint.setFont(new Font("SansSerif", Font.ITALIC, 14));
         hint.setForeground(Color.GRAY);
 
-        studentBtn.addActionListener(e -> navigateToSignUp("Student"));
-        professorBtn.addActionListener(e -> navigateToSignUp("Professor"));
+        studentBtn.addActionListener(e -> navigateToSignUp("student"));
+        professorBtn.addActionListener(e -> navigateToSignUp("professor"));
 
         panel.add(title);
         panel.add(studentBtn);
@@ -137,6 +139,7 @@ public class OnboardingSlider extends JFrame {
 
     private void navigateToSignUp(String role) {
         SignUpScreen signUpScreen = new SignUpScreen(role);
+        System.out.println("sent role :"+role);
         signUpScreen.setVisible(true);
         this.setVisible(false);
     }
