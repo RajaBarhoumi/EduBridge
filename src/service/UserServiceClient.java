@@ -36,4 +36,13 @@ public class UserServiceClient {
         }
     }
 
+    public User getUserById(int id) {
+        try {
+            return userService.getUserById(id);
+        } catch (RemoteException e) {
+            System.err.println("RemoteException during getUserById: " + e.getMessage());
+            return null;
+        }
+    }
+
 }

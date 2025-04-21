@@ -3,6 +3,7 @@ package ui.auth;
 import models.User;
 import service.UserServiceClient;
 import ui.professor.ProfessorDashboard;
+import ui.student.StudentDashboard;
 
 import javax.swing.*;
 import java.awt.*;
@@ -65,7 +66,9 @@ public class LoginScreen extends JFrame {
                     switch (userRole.toLowerCase()) {
                         case "student":
                             System.out.println("Logged in as " + user.getEmail());
-                            // new StudentDashboardScreen().setVisible(true); // Uncomment when implemented
+                            SwingUtilities.invokeLater(() -> {
+                                new StudentDashboard(user.getId()).setVisible(true);
+                            });
                             break;
                         case "professor":
                             System.out.println("Logged in as " + user.getEmail());
