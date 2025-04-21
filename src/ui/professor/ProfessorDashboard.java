@@ -38,10 +38,12 @@ public class ProfessorDashboard extends JFrame {
 
         // Summary Cards
         topPanel.add(createSummaryCard("📘 Courses", "12", () -> {
-            new CourseListScreen(professorId).setVisible(true);
+            new ProfessorCourseManager(professorId).setVisible(true);
         }));
 
-        topPanel.add(createSummaryCard("📝 Tests", "25", null));
+        topPanel.add(createSummaryCard("📝 Tests", "25", () -> {
+            new ProfessorTestManager(professorId).setVisible(true);
+        }));
         topPanel.add(createSummaryCard("📈 Avg Pass", "82%", null));
         topPanel.add(createSummaryCard("🎓 Certificates", "130", null));
 
@@ -56,7 +58,7 @@ public class ProfessorDashboard extends JFrame {
         JButton createTestBtn = new JButton("➕ Create Test");
 
         createCourseBtn.addActionListener(e -> {
-            new AddCourseForm(professorId).setVisible(true);
+            //new AddCourseForm(professorId).setVisible(true);
         });
 
         styleButton(createCourseBtn);

@@ -65,4 +65,13 @@ public class TestServiceClient {
             return false;
         }
     }
+
+    public List<Test> getTestsByProfessorId(int professorId) {
+        try {
+            return testService.getTestsByProfessorId(professorId);
+        } catch (RemoteException e) {
+            System.err.println("RemoteException during getTestsByProfessorId: " + e.getMessage());
+            return null;
+        }
+    }
 }
