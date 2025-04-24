@@ -10,9 +10,12 @@ import java.awt.*;
 
 public class LoginScreen extends JFrame {
     private String role;
-
-    public LoginScreen(String role) {
+    public LoginScreen(String role){
         this.role = role;
+    }
+
+    public LoginScreen() {
+
         setTitle("EduBridge - Log In");
         setSize(450, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -23,7 +26,7 @@ public class LoginScreen extends JFrame {
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
         // 🖼️ Add logo/image
-        ImageIcon icon = new ImageIcon("assets/login.png"); // Update the path as needed
+        ImageIcon icon = new ImageIcon(LoginScreen.class.getClassLoader().getResource("login.png")); // Update the path as needed
         Image image = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
         JLabel imageLabel = new JLabel(new ImageIcon(image));
         imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);

@@ -20,7 +20,7 @@ public class SignUpScreen extends JFrame {
         mainPanel.setBackground(new Color(240, 248, 255));
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-        ImageIcon icon = new ImageIcon("./assets/login.png"); // Adjust path if needed
+        ImageIcon icon = new ImageIcon(SignUpScreen.class.getClassLoader().getResource("login.png")); // Adjust path if needed
         Image image = icon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
         JLabel imageLabel = new JLabel(new ImageIcon(image));
         imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -62,7 +62,7 @@ public class SignUpScreen extends JFrame {
             if (success) {
                 JOptionPane.showMessageDialog(this, "Registration successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 dispose();
-                new LoginScreen(role).setVisible(true);
+                new LoginScreen().setVisible(true);
             } else {
                 JOptionPane.showMessageDialog(this, "Registration failed. Try again later.", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -72,7 +72,7 @@ public class SignUpScreen extends JFrame {
         loginLink.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 dispose();
-                new LoginScreen(role).setVisible(true);
+                new LoginScreen().setVisible(true);
             }
         });
 

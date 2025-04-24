@@ -74,4 +74,14 @@ public class CourseServiceClient {
             return null;
         }
     }
+
+    public List<Course> getCoursesByStudentId(int studentId) {
+        try {
+            return courseService.getCoursesByStudentId(studentId);
+        } catch (RemoteException e) {
+            System.err.println("RemoteException during getCoursesByStudentId: " + e.getMessage());
+            return null;
+        }
+    }
+
 }

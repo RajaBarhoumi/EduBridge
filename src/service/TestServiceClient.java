@@ -74,4 +74,13 @@ public class TestServiceClient {
             return null;
         }
     }
+
+    public List<Test> getTestsByStudentId(int studentId) {
+        try {
+            return testService.getTestsByStudentId(studentId);
+        } catch (RemoteException e) {
+            System.err.println("RemoteException during getTestsByStudentId: " + e.getMessage());
+            return null;
+        }
+    }
 }

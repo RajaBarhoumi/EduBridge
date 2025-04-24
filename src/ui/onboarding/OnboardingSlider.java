@@ -1,5 +1,6 @@
 package ui.onboarding;
 
+import ui.auth.LoginScreen;
 import ui.auth.SignUpScreen;
 
 import javax.swing.*;
@@ -77,9 +78,9 @@ public class OnboardingSlider extends JFrame {
 
         JTextArea desc = new JTextArea("Explore exciting courses, pass QCM tests, and earn certificates.\nTrack your growth and challenge yourself.");
         styleText(desc);
-
-        JLabel image = new JLabel(new ImageIcon("./assets/student.png"), SwingConstants.CENTER);
-
+        JLabel image = new JLabel(new ImageIcon(
+                OnboardingSlider.class.getClassLoader().getResource("student.png")  // No leading slash
+        ), SwingConstants.CENTER);
         panel.add(title, BorderLayout.NORTH);
         panel.add(image, BorderLayout.CENTER);
         panel.add(desc, BorderLayout.SOUTH);
@@ -98,7 +99,7 @@ public class OnboardingSlider extends JFrame {
         JTextArea desc = new JTextArea("As a professor, manage your courses, create QCM tests,\nand evaluate your students' performance.");
         styleText(desc);
 
-        JLabel image = new JLabel(new ImageIcon("./assets/teacher.png"), SwingConstants.CENTER); // Replace with your uploaded image
+        JLabel image = new JLabel(new ImageIcon(OnboardingSlider.class.getClassLoader().getResource("teacher.png")), SwingConstants.CENTER); // Replace with your uploaded image
 
         panel.add(title, BorderLayout.NORTH);
         panel.add(image, BorderLayout.CENTER);
@@ -128,6 +129,13 @@ public class OnboardingSlider extends JFrame {
 
         studentBtn.addActionListener(e -> navigateToSignUp("student"));
         professorBtn.addActionListener(e -> navigateToSignUp("professor"));
+        hint.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        hint.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                dispose();
+                new LoginScreen().setVisible(true);
+            }
+        });
 
         panel.add(title);
         panel.add(studentBtn);

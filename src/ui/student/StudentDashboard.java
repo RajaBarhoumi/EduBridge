@@ -1,6 +1,8 @@
 package ui.student;
 
+import models.Test;
 import models.User;
+import service.TestServiceClient;
 import service.UserServiceClient;
 
 import javax.swing.*;
@@ -23,7 +25,6 @@ public class StudentDashboard extends JFrame {
         UserServiceClient client = new UserServiceClient();
         User student = client.getUserById(studentId);
 
-        // Gradient top panel for a warm greeting
         JPanel topPanel = new JPanel() {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -42,22 +43,18 @@ public class StudentDashboard extends JFrame {
         welcomeLabel.setForeground(Color.WHITE);
         topPanel.add(welcomeLabel);
 
-        // Summary Cards Panel
         JPanel summaryPanel = new JPanel(new GridLayout(1, 4, 20, 20));
         summaryPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         summaryPanel.add(createSummaryCard("📘 Courses", "5", () -> {
             openCourses();
         }));
         summaryPanel.add(createSummaryCard("📝 Tests", "3", () -> {
-            // Open test taking screen
+            openTests();
         }));
-        summaryPanel.add(createSummaryCard("📈 Avg Score", "75%", null));
         summaryPanel.add(createSummaryCard("🎓 Certificates", "2", null));
 
-        // Progress chart section
         JPanel chartPanel = new JPanel(new BorderLayout());
         chartPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        // Add everything to the frame
         add(topPanel, BorderLayout.NORTH);
         add(summaryPanel, BorderLayout.CENTER);
         add(chartPanel, BorderLayout.SOUTH);
@@ -68,7 +65,7 @@ public class StudentDashboard extends JFrame {
     private JPanel createSummaryCard(String title, String value, Runnable onClick) {
         JPanel card = new JPanel();
         card.setLayout(new BorderLayout());
-        card.setBackground(new Color(100, 181, 246));  // Light Blue for Student Theme
+        card.setBackground(new Color(100, 181, 246));
         card.setPreferredSize(new Dimension(200, 100));
         card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
@@ -96,13 +93,20 @@ public class StudentDashboard extends JFrame {
     }
 
     private void openCourses() {
-        // Create and show the Course List Panel
         CourseListPanel courseListPanel = new CourseListPanel(studentId);
-        // You may want to display this in a new window or within a tab.
         JFrame courseFrame = new JFrame("Courses");
         courseFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         courseFrame.setSize(1000, 700);
         courseFrame.add(courseListPanel);
         courseFrame.setVisible(true);
+    }
+
+    private void openTests() {
+        TestListPanel testListPanel = new TestListPanel(studentId);
+        JFrame testFrame = new JFrame("Test List");
+        testFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        testFrame.setSize(1000, 700);
+        testFrame.add(testListPanel);
+        testFrame.setVisible(true);
     }
 }
