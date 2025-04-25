@@ -1,10 +1,8 @@
 package ui.student;
 
-import models.Test;
 import models.User;
 import service.EnrollmentServiceClient;
 import service.StudentTestServiceClient;
-import service.TestServiceClient;
 import service.UserServiceClient;
 
 import javax.swing.*;
@@ -18,6 +16,10 @@ public class StudentDashboard extends JFrame {
     private UserServiceClient client;
     private EnrollmentServiceClient enrollmentClient;
     private StudentTestServiceClient testClient;
+    private StudentDashboardHandler statsUpdaterThread;
+    private JLabel courseCountLabel;
+    private JLabel testCountLabel;
+    private JLabel certificateCountLabel;
 
     public StudentDashboard(int studentId) {
         this.enrollmentClient = new EnrollmentServiceClient();
@@ -54,26 +56,62 @@ public class StudentDashboard extends JFrame {
         welcomeLabel.setForeground(Color.WHITE);
         topPanel.add(welcomeLabel);
 
-        JPanel summaryPanel = new JPanel(new GridLayout(1, 4, 20, 20));
+        JPanel summaryPanel = new JPanel(new GridLayout(1, 3, 20, 20));
         summaryPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         summaryPanel.add(createSummaryCard("📘 Courses", String.valueOf(courseCount), () -> {
             openCourses();
-        }));
+        }, "course"));
         summaryPanel.add(createSummaryCard("📝 Tests", String.valueOf(testCount), () -> {
             openTests();
-        }));
-        summaryPanel.add(createSummaryCard("🎓 Certificates", String.valueOf(certificateCount), null));
+        }, "test"));
+        summaryPanel.add(createSummaryCard("🎓 Certificates", String.valueOf(certificateCount), null, "certificate"));
 
         JPanel chartPanel = new JPanel(new BorderLayout());
         chartPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
         add(topPanel, BorderLayout.NORTH);
         add(summaryPanel, BorderLayout.CENTER);
         add(chartPanel, BorderLayout.SOUTH);
 
+        // Start the stats updater thread
+        statsUpdaterThread = new StudentDashboardHandler(this, enrollmentClient, testClient);
+        statsUpdaterThread.start();
+
         setVisible(true);
     }
 
-    private JPanel createSummaryCard(String title, String value, Runnable onClick) {
+    public int getStudentId() {
+        return studentId;
+    }
+
+    // Update methods for dynamic statistics
+    public void updateCourseCount(int newCount) {
+        if (courseCountLabel != null) {
+            courseCountLabel.setText(String.valueOf(newCount));
+        }
+    }
+
+    public void updateTestCount(int newCount) {
+        if (testCountLabel != null) {
+            testCountLabel.setText(String.valueOf(newCount));
+        }
+    }
+
+    public void updateCertificateCount(int newCount) {
+        if (certificateCountLabel != null) {
+            certificateCountLabel.setText(String.valueOf(newCount));
+        }
+    }
+
+    @Override
+    public void dispose() {
+        if (statsUpdaterThread != null) {
+            statsUpdaterThread.stopThread();
+        }
+        super.dispose();
+    }
+
+    private JPanel createSummaryCard(String title, String value, Runnable onClick, String labelType) {
         JPanel card = new JPanel();
         card.setLayout(new BorderLayout());
         card.setBackground(new Color(100, 181, 246));
@@ -87,6 +125,14 @@ public class StudentDashboard extends JFrame {
         JLabel valueLabel = new JLabel(value);
         valueLabel.setFont(new Font("SansSerif", Font.BOLD, 28));
         valueLabel.setForeground(Color.WHITE);
+
+        if ("course".equals(labelType)) {
+            courseCountLabel = valueLabel;
+        } else if ("test".equals(labelType)) {
+            testCountLabel = valueLabel;
+        } else if ("certificate".equals(labelType)) {
+            certificateCountLabel = valueLabel;
+        }
 
         card.add(titleLabel, BorderLayout.NORTH);
         card.add(valueLabel, BorderLayout.CENTER);

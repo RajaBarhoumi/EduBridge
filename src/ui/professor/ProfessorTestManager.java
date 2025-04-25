@@ -318,8 +318,32 @@ public class ProfessorTestManager extends JFrame {
             option.setQuestionId(questionId);
             option.setContent(contentField.getText());
             option.setCorrect(correctCheck.isSelected());
-            optionService.addOption(option);
-            loadTests();
+
+            try {
+                boolean success = optionService.addOption(option);
+                if (success) {
+                    JOptionPane.showMessageDialog(this, "Option added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    loadTests();
+                }
+            } catch (Exception e) {
+                if (e.getMessage().contains("Only one correct option is allowed")) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Cannot add another correct option. This question already has a correct option. Please edit or delete the existing correct option first.",
+                            "Multiple Correct Options Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                } else {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Failed to add option: " + e.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        } else if (contentField.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Option content cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
