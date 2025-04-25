@@ -2,6 +2,8 @@ package ui.student;
 
 import models.Test;
 import models.User;
+import service.EnrollmentServiceClient;
+import service.StudentTestServiceClient;
 import service.TestServiceClient;
 import service.UserServiceClient;
 
@@ -13,8 +15,13 @@ import java.awt.event.MouseEvent;
 public class StudentDashboard extends JFrame {
 
     private int studentId;
+    private UserServiceClient client;
+    private EnrollmentServiceClient enrollmentClient;
+    private StudentTestServiceClient testClient;
 
     public StudentDashboard(int studentId) {
+        this.enrollmentClient = new EnrollmentServiceClient();
+        this.testClient = new StudentTestServiceClient();
         this.studentId = studentId;
         setTitle("Student Dashboard");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -22,8 +29,12 @@ public class StudentDashboard extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        UserServiceClient client = new UserServiceClient();
+        client = new UserServiceClient();
         User student = client.getUserById(studentId);
+
+        int courseCount = enrollmentClient.getCourseCountByStudentId(studentId);
+        int testCount = testClient.getTestCountByStudentId(studentId);
+        int certificateCount = testClient.getCertificateCountByStudentId(studentId);
 
         JPanel topPanel = new JPanel() {
             protected void paintComponent(Graphics g) {
@@ -45,13 +56,13 @@ public class StudentDashboard extends JFrame {
 
         JPanel summaryPanel = new JPanel(new GridLayout(1, 4, 20, 20));
         summaryPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        summaryPanel.add(createSummaryCard("📘 Courses", "5", () -> {
+        summaryPanel.add(createSummaryCard("📘 Courses", String.valueOf(courseCount), () -> {
             openCourses();
         }));
-        summaryPanel.add(createSummaryCard("📝 Tests", "3", () -> {
+        summaryPanel.add(createSummaryCard("📝 Tests", String.valueOf(testCount), () -> {
             openTests();
         }));
-        summaryPanel.add(createSummaryCard("🎓 Certificates", "2", null));
+        summaryPanel.add(createSummaryCard("🎓 Certificates", String.valueOf(certificateCount), null));
 
         JPanel chartPanel = new JPanel(new BorderLayout());
         chartPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));

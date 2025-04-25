@@ -92,4 +92,22 @@ public class StudentTestServiceClient {
         }
     }
 
+    public int getTestCountByStudentId(int studentId){
+        try{
+            return studentTestService.getTestCountByStudentId(studentId);
+        }catch (RemoteException e){
+            System.err.println("RemoteException during getTestCountByStudentId: " + e.getMessage());
+            return -1;
+        }
+    }
+
+    public int getCertificateCountByStudentId(int studentId) {
+        try {
+            return studentTestService.getCertificateCountByStudentId(studentId);
+        }catch (RemoteException e){
+            System.err.println("RemoteException during getCertificateCountByStudentId: " + e.getMessage());
+            return -1;
+        }
+    }
+
 }

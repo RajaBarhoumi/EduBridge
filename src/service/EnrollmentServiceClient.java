@@ -46,4 +46,13 @@ public class EnrollmentServiceClient {
             return false;
         }
     }
+
+    public int getCourseCountByStudentId(int studentId) {
+        try {
+            return enrollmentService.getCourseCountByStudentId(studentId);
+        }catch (RemoteException e) {
+            System.err.println("RemoteException during getCourseCountByStudentId: " + e.getMessage());
+            return 0;
+        }
+    }
 }
