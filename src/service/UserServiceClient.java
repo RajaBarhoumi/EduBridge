@@ -45,4 +45,12 @@ public class UserServiceClient {
         }
     }
 
+    public User getStudentByStudentTestId(int studentTestId) {
+        try {
+            return userService.getStudentByStudentTestId(studentTestId);
+        } catch (RemoteException e) {
+            System.err.println("RemoteException during getStudentByStudentTestId: " + e.getMessage());
+            return null;
+        }
+    }
 }

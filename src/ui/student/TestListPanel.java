@@ -51,7 +51,28 @@ public class TestListPanel extends JPanel {
             startButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    startTest(test.getId(), studentId);
+                    TestServiceClient serviceClient = new TestServiceClient();
+                    int questionCount = serviceClient.getNumberOfQuestions(test.getId());
+                    int timeLimit = test.getTimeLimit(); // assuming minutes
+
+                    String message = String.format(
+                            "Test Title: %s\nQuestions: %d\nTime Limit: %d minutes\n\n" +
+                                    "To receive a certificate, you must answer at least 80%% of the questions correctly.\n\n" +
+                                    "Do you want to start?",
+                            test.getTitle(), questionCount, timeLimit
+                    );
+
+                    int response = JOptionPane.showConfirmDialog(
+                            null,
+                            message,
+                            "Start Test Confirmation",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.QUESTION_MESSAGE
+                    );
+
+                    if (response == JOptionPane.YES_OPTION) {
+                        startTest(test, studentId);
+                    }
                 }
             });
 
@@ -62,32 +83,33 @@ public class TestListPanel extends JPanel {
         add(testPanel, BorderLayout.CENTER);
     }
 
-    private void startTest(int testId, int studentId) {
+    private void startTest(Test test, int studentId) {
         StudentTestServiceClient studentTestService = new StudentTestServiceClient();
         StudentTest studentTest = new StudentTest();
 
         studentTest.setStudentId(studentId);
-        studentTest.setTestId(testId);
+        studentTest.setTestId(test.getId());
         studentTest.setScore(0f);
         studentTest.setPassed(false);
-        studentTest.setCertificateGenerated(false);
         studentTest.setTakenDate(new Timestamp(System.currentTimeMillis()));
 
-        boolean added = studentTestService.addStudentTest(studentTest);
+        int studentTestId = studentTestService.addStudentTest(studentTest);
 
-        if (!added) {
+        if (studentTestId == -1) {
             JOptionPane.showMessageDialog(null, "Failed to register test attempt. Please try again.");
             return;
         }
 
         QuestionServiceClient questionService = new QuestionServiceClient();
-        List<Question> questions = questionService.getQuestionsByTest(testId);
+        List<Question> questions = questionService.getQuestionsByTest(test.getId());
 
         if (questions != null && !questions.isEmpty()) {
-            TestScreen testScreen = new TestScreen(testId, studentId, questions);
+            TestScreen testScreen = new TestScreen(test, studentTestId, questions);
             testScreen.setVisible(true);
         } else {
             JOptionPane.showMessageDialog(null, "No questions found for this test.");
         }
     }
+
+
 }

@@ -224,8 +224,6 @@ public class ProfessorTestManager extends JFrame {
     private void openTestDialog(boolean isUpdate, Test test) {
         JTextField titleField = new JTextField(test != null ? test.getTitle() : "", 20);
         JTextField timeLimitField = new JTextField(test != null ? String.valueOf(test.getTimeLimit()) : "", 5);
-        JTextField maxAttemptsField = new JTextField(test != null ? String.valueOf(test.getMaxAttempts()) : "", 5);
-
         JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
         panel.setBorder(new EmptyBorder(10, 10, 10, 10));
         panel.add(new JLabel("Test Title:"));
@@ -233,7 +231,6 @@ public class ProfessorTestManager extends JFrame {
         panel.add(new JLabel("Time Limit (mins):"));
         panel.add(timeLimitField);
         panel.add(new JLabel("Max Attempts:"));
-        panel.add(maxAttemptsField);
 
         int result = JOptionPane.showConfirmDialog(this, panel, isUpdate ? "Update Test" : "Add Test", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
@@ -249,7 +246,6 @@ public class ProfessorTestManager extends JFrame {
             newTest.setProfessorId(professorId);
             try {
                 newTest.setTimeLimit(Integer.parseInt(timeLimitField.getText()));
-                newTest.setMaxAttempts(Integer.parseInt(maxAttemptsField.getText()));
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(this, "Please enter valid numeric values.");
                 return;

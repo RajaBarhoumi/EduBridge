@@ -83,4 +83,23 @@ public class TestServiceClient {
             return null;
         }
     }
+
+    public int getNumberOfQuestions(int testId) {
+        try {
+            return testService.getNumberOfQuestions(testId);
+        } catch (RemoteException e) {
+            System.err.println("RemoteException during getNumberOfQuestions: " + e.getMessage());
+            return -1;
+        }
+    }
+
+    public int getTestCountByProfessorId(int professorId) {
+        try {
+            return testService.getTestCountByProfessorId(professorId);
+        }catch (RemoteException e){
+            System.err.println("RemoteException during getTestCountByProfessorId: " + e.getMessage());
+            return -1;
+        }
+    }
+
 }

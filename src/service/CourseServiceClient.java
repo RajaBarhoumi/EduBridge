@@ -6,6 +6,7 @@ import rmi.CourseRemoteService;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Map;
 
 public class CourseServiceClient {
     private CourseRemoteService courseService;
@@ -84,4 +85,30 @@ public class CourseServiceClient {
         }
     }
 
+    public Course getCourseByTestId(int testId) {
+        try {
+            return courseService.getCourseByTestId(testId);
+        } catch (RemoteException e) {
+            System.err.println("RemoteException during getCourseByTestId: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public int getCourseCountByProfessorId(int professorId){
+        try {
+            return courseService.getCourseCountByProfessorId(professorId);
+        }catch (RemoteException e){
+            System.err.println("RemoteException during getCourseCountByProfessorId: " + e.getMessage());
+            return 0;
+        }
+    }
+
+    public Map<String, Integer> getPassRateDistributionByCourse(int professorId){
+        try{
+            return courseService.getPassRateDistributionByCourse(professorId);
+        }catch (RemoteException e){
+            System.err.println("RemoteException during getPassRateDistributionByCourse: " + e.getMessage());
+            return null;
+        }
+    }
 }

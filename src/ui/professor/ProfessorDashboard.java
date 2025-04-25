@@ -4,16 +4,27 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Map;
 
 import org.jfree.chart.*;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.general.DefaultPieDataset;
+import service.CourseServiceClient;
+import service.StudentTestServiceClient;
+import service.TestServiceClient;
 
 public class ProfessorDashboard extends JFrame {
 
     private int professorId;
+    private CourseServiceClient courseServiceClient;
+    private StudentTestServiceClient studentTestServiceClient;
+    private TestServiceClient testServiceClient;
 
     public ProfessorDashboard(int professorId) {
+        this.courseServiceClient = new CourseServiceClient();
+        this.studentTestServiceClient = new StudentTestServiceClient();
+        this.testServiceClient = new TestServiceClient();
+
         this.professorId = professorId;
         setTitle("Professor Dashboard");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -36,16 +47,20 @@ public class ProfessorDashboard extends JFrame {
         topPanel.setLayout(new GridLayout(1, 4, 20, 20));
         topPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Summary Cards
-        topPanel.add(createSummaryCard("📘 Courses", "12", () -> {
+        int courseCount = courseServiceClient.getCourseCountByProfessorId(professorId);
+        int testCount = testServiceClient.getTestCountByProfessorId(professorId);
+        int certificateCount = studentTestServiceClient.getCertificateCountByProfessorId(professorId);
+
+        topPanel.add(createSummaryCard("📘 Courses", String.valueOf(courseCount), () -> {
             new ProfessorCourseManager(professorId).setVisible(true);
         }));
 
-        topPanel.add(createSummaryCard("📝 Tests", "25", () -> {
+        topPanel.add(createSummaryCard("📝 Tests", String.valueOf(testCount), () -> {
             new ProfessorTestManager(professorId).setVisible(true);
         }));
+
         topPanel.add(createSummaryCard("📈 Avg Pass", "82%", null));
-        topPanel.add(createSummaryCard("🎓 Certificates", "130", null));
+        topPanel.add(createSummaryCard("🎓 Certificates", String.valueOf(certificateCount), null));
 
         // Chart Panel
         JPanel chartPanel = new JPanel(new BorderLayout());
@@ -107,10 +122,13 @@ public class ProfessorDashboard extends JFrame {
 
     private Component createPieChart() {
         DefaultPieDataset dataset = new DefaultPieDataset();
-        dataset.setValue("Java Basics", 40);
-        dataset.setValue("OOP", 25);
-        dataset.setValue("Databases", 15);
-        dataset.setValue("Algorithms", 20);
+
+        Map<String, Integer> passRates = courseServiceClient.getPassRateDistributionByCourse(professorId);
+        if (passRates != null) {
+            for (Map.Entry<String, Integer> entry : passRates.entrySet()) {
+                dataset.setValue(entry.getKey(), entry.getValue());
+            }
+        }
 
         JFreeChart chart = ChartFactory.createPieChart(
                 "Student Pass Rate by Course",
@@ -118,12 +136,15 @@ public class ProfessorDashboard extends JFrame {
                 true, true, false);
 
         PiePlot plot = (PiePlot) chart.getPlot();
-        plot.setSectionPaint("Java Basics", new Color(63, 81, 181));
-        plot.setSectionPaint("OOP", new Color(103, 58, 183));
-        plot.setSectionPaint("Databases", new Color(100, 181, 246));
-        plot.setSectionPaint("Algorithms", new Color(144, 202, 249));
-        chart.setBackgroundPaint(Color.WHITE);
+        Color[] colors = {new Color(63, 81, 181), new Color(103, 58, 183),
+                new Color(100, 181, 246), new Color(144, 202, 249)};
+        int i = 0;
+        for (Object key : dataset.getKeys()) {
+            plot.setSectionPaint((Comparable) key, colors[i % colors.length]);
+            i++;
+        }
 
+        chart.setBackgroundPaint(Color.WHITE);
         return new ChartPanel(chart);
     }
 

@@ -36,4 +36,14 @@ public class AnswerServiceClient {
             return null;
         }
     }
+
+    public boolean isAnswerCorrect(int selectedOptionId) {
+        try {
+            return answerService.isAnswerCorrect(selectedOptionId);
+        } catch (RemoteException e) {
+            System.err.println("RemoteException during isAnswerCorrect: " + e.getMessage());
+            return false;
+        }
+    }
+
 }

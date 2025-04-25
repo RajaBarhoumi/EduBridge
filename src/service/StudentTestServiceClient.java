@@ -18,13 +18,12 @@ public class StudentTestServiceClient {
         }
     }
 
-    public boolean addStudentTest(StudentTest studentTest) {
+    public int addStudentTest(StudentTest studentTest) {
         try {
-            studentTestService.addStudentTest(studentTest);
-            return true;
+            return studentTestService.addStudentTest(studentTest);
         } catch (RemoteException e) {
             System.err.println("RemoteException during addStudentTest: " + e.getMessage());
-            return false;
+            return -1;
         }
     }
 
@@ -74,4 +73,23 @@ public class StudentTestServiceClient {
             return false;
         }
     }
+
+    public String calculateAndUpdateStudentTestScore(int studentTestId) {
+        try {
+            return studentTestService.calculateAndUpdateStudentTestScore(studentTestId);
+        } catch (RemoteException e) {
+            System.err.println("RemoteException during calculateAndUpdateStudentTestScore: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public int getCertificateCountByProfessorId(int professorId){
+        try {
+            return studentTestService.getCertificateCountByProfessorId(professorId);
+        }catch (RemoteException e){
+            System.err.println("RemoteException during getCertificateCountByProfessorId: " + e.getMessage());
+            return -1;
+        }
+    }
+
 }
