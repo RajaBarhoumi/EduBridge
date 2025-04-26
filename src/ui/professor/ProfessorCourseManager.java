@@ -15,6 +15,7 @@ public class ProfessorCourseManager extends JFrame {
     private JTable courseTable;
     private DefaultTableModel tableModel;
 
+    //sarra writes here
     private JTextField titleField;
     private JTextArea descriptionArea;
     private JComboBox<Course.Level> levelCombo;
