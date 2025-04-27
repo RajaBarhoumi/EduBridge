@@ -4,6 +4,7 @@ import models.Course;
 import service.CourseServiceClient;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -15,14 +16,13 @@ public class ProfessorCourseManager extends JFrame {
     private JTable courseTable;
     private DefaultTableModel tableModel;
 
-    //sarra writes here
     private JTextField titleField;
     private JTextArea descriptionArea;
     private JComboBox<Course.Level> levelCombo;
     private JButton submitBtn;
 
     private int professorId;
-    private Integer selectedCourseId = null; // used for update
+    private Integer selectedCourseId = null;
 
     public ProfessorCourseManager(int professorId) {
         this.professorId = professorId;
@@ -30,13 +30,44 @@ public class ProfessorCourseManager extends JFrame {
         setSize(900, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(new BorderLayout());
 
-        add(createTopPanel(), BorderLayout.NORTH);
-        add(createTablePanel(), BorderLayout.CENTER);
+        // Create main panel with BorderLayout
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
+        // Add back button at the top
+        mainPanel.add(createBackButtonPanel(), BorderLayout.NORTH);
+
+        // Add the rest of your content
+        mainPanel.add(createTopPanel(), BorderLayout.CENTER);
+        mainPanel.add(createTablePanel(), BorderLayout.SOUTH);
+
+        add(mainPanel);
         refreshCourseTable();
         setVisible(true);
+    }
+
+    private JPanel createBackButtonPanel() {
+        // Create back button
+        ImageIcon backIcon = new ImageIcon(getClass().getClassLoader().getResource("back_arrow.png"));
+        Image img = backIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        JButton backButton = new JButton(new ImageIcon(img));
+        backButton.setBorderPainted(false);
+        backButton.setContentAreaFilled(false);
+        backButton.setFocusPainted(false);
+        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        backButton.addActionListener(e -> {
+            dispose();
+            new ProfessorDashboard(professorId).setVisible(true);
+        });
+
+        // Create panel for back button
+        JPanel backPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        backPanel.setBackground(Color.WHITE);
+        backPanel.add(backButton);
+
+        return backPanel;
     }
 
     private JPanel createTopPanel() {

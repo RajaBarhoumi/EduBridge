@@ -136,6 +136,8 @@ public class OnboardingSlider extends JFrame {
                 new LoginScreen().setVisible(true);
             }
         });
+        // i added this
+
 
         panel.add(title);
         panel.add(studentBtn);
@@ -144,7 +146,10 @@ public class OnboardingSlider extends JFrame {
 
         return panel;
     }
-
+    public void setSlideIndex(int index) {
+        this.slideIndex = index;
+        cardLayout.show(cardPanel, "slide" + slideIndex);
+    }
     private void navigateToSignUp(String role) {
         SignUpScreen signUpScreen = new SignUpScreen(role);
         System.out.println("sent role :"+role);
@@ -168,7 +173,7 @@ public class OnboardingSlider extends JFrame {
         button.setFocusPainted(false);
     }
 
-    private void updateButtonColors() {
+        private void updateButtonColors() {
         nextButton.setEnabled(true);
         prevButton.setEnabled(true);
 
@@ -194,6 +199,7 @@ public class OnboardingSlider extends JFrame {
             prevButton.setForeground(Color.WHITE);
         }
     }
+
 
 
 }

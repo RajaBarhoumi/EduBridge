@@ -59,10 +59,12 @@ public class ProfessorDashboard extends JFrame {
 
         topPanel.add(createSummaryCard("📘 Courses", String.valueOf(courseCount), () -> {
             new ProfessorCourseManager(professorId).setVisible(true);
+            dispose();
         }, "course"));
 
         topPanel.add(createSummaryCard("📝 Tests", String.valueOf(testCount), () -> {
             new ProfessorTestManager(professorId).setVisible(true);
+            dispose();
         }, "test"));
 
         topPanel.add(createSummaryCard("🎓 Certificates", String.valueOf(certificateCount), null, "certificate"));

@@ -8,6 +8,7 @@ import models.Course;
 import models.Enrollment;
 import service.CourseServiceClient;
 import service.EnrollmentServiceClient;
+import ui.auth.LoginScreen;
 
 public class CourseListPanel extends JPanel {
     private int studentId;
@@ -96,6 +97,37 @@ public class CourseListPanel extends JPanel {
         containerPanel.add(availableScrollPane);
 
         add(titleLabel, BorderLayout.NORTH);
+        add(containerPanel, BorderLayout.CENTER);
+
+
+        // 🏹 Back Button (now in the BorderLayout)
+        ImageIcon backIcon = new ImageIcon(LoginScreen.class.getClassLoader().getResource("back_arrow.png"));
+        Image img = backIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        JButton backButton = new JButton(new ImageIcon(img));
+        backButton.setBorderPainted(false);
+        backButton.setContentAreaFilled(false);
+        backButton.setFocusPainted(false);
+        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+
+        backButton.addActionListener(e -> {
+            // Get the parent window (JFrame) that contains this panel
+            Window parentWindow = SwingUtilities.getWindowAncestor(CourseListPanel.this);
+            if (parentWindow != null) {
+                parentWindow.dispose(); // Close the current window
+            }
+
+            StudentDashboard Screen = new StudentDashboard(studentId);
+            Screen.setVisible(true);
+        });
+
+        // Add back button to the top left
+        JPanel backPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        backPanel.setBackground(new Color(240, 248, 255));
+        backPanel.add(backButton);
+
+        // Add backPanel and mainPanel to the frame
+        add(backPanel, BorderLayout.NORTH);
         add(containerPanel, BorderLayout.CENTER);
     }
 

@@ -60,9 +60,11 @@ public class StudentDashboard extends JFrame {
         summaryPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         summaryPanel.add(createSummaryCard("📘 Courses", String.valueOf(courseCount), () -> {
             openCourses();
+            dispose();
         }, "course"));
         summaryPanel.add(createSummaryCard("📝 Tests", String.valueOf(testCount), () -> {
             openTests();
+            dispose();
         }, "test"));
         summaryPanel.add(createSummaryCard("🎓 Certificates", String.valueOf(certificateCount), null, "certificate"));
 
