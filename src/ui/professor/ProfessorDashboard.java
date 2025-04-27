@@ -56,7 +56,7 @@ public class ProfessorDashboard extends JFrame {
         topPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
 // Back button
-        ImageIcon backIcon = new ImageIcon(LoginScreen.class.getClassLoader().getResource("logout.png"));
+        ImageIcon backIcon = new ImageIcon(ProfessorDashboard.class.getClassLoader().getResource("logout.png"));
         Image img = backIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
         JButton backButton = new JButton(new ImageIcon(img));
         backButton.setBorderPainted(false);

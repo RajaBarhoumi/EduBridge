@@ -22,27 +22,30 @@ public class StudentDashboardHandler extends Thread {
     public void run() {
         while (running) {
             try {
-                // Fetch all statistics
                 int courseCount = enrollmentServiceClient.getCourseCountByStudentId(dashboard.getStudentId());
                 int testCount = studentTestServiceClient.getTestCountByStudentId(dashboard.getStudentId());
                 int certificateCount = studentTestServiceClient.getCertificateCountByStudentId(dashboard.getStudentId());
 
-                // Update dashboard on Event Dispatch Thread
                 javax.swing.SwingUtilities.invokeLater(() -> {
                     dashboard.updateCourseCount(courseCount);
                     dashboard.updateTestCount(testCount);
                     dashboard.updateCertificateCount(certificateCount);
                 });
 
-                // Sleep for 30 seconds
-                Thread.sleep(30_000);
+                Thread.sleep(5000);
             } catch (InterruptedException e) {
-                running = false; // Exit on interrupt
+                if (!running) {
+                    System.out.println("Dashboard updater thread stopped.");
+                } else {
+                    System.err.println("Thread interrupted unexpectedly: " + e.getMessage());
+                }
+                break; // Exit the loop
             } catch (Exception e) {
                 System.err.println("Error fetching dashboard statistics: " + e.getMessage());
             }
         }
     }
+
 
     public void stopThread() {
         running = false;

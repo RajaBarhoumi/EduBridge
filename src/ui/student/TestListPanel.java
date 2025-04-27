@@ -18,7 +18,7 @@ import java.awt.event.ActionListener;
 import java.sql.Timestamp;
 import java.util.List;
 
-public class TestListPanel extends JPanel {
+public class TestListPanel extends JFrame {
     private int studentId;
 
     // Color scheme
@@ -31,10 +31,14 @@ public class TestListPanel extends JPanel {
     private final Color BORDER_COLOR = new Color(224, 224, 224);
 
     public TestListPanel(int studentId) {
+        this.setTitle("Test List");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(1000, 700);
+        setLocationRelativeTo(null);
         this.studentId = studentId;
         setLayout(new BorderLayout());
         setBackground(BACKGROUND_COLOR);
-        setBorder(new EmptyBorder(20, 20, 20, 20));
+        //this.setBorder(new EmptyBorder(20, 20, 20, 20));
 
         TestServiceClient testServiceClient = new TestServiceClient();
         List<Test> testList = testServiceClient.getTestsByStudentId(studentId);
@@ -77,7 +81,7 @@ public class TestListPanel extends JPanel {
 
 
         // 🏹 Back Button (now in the BorderLayout)
-        ImageIcon backIcon = new ImageIcon(LoginScreen.class.getClassLoader().getResource("back_arrow.png"));
+        ImageIcon backIcon = new ImageIcon(TestListPanel.class.getClassLoader().getResource("back_arrow.png"));
         Image img = backIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
         JButton backButton = new JButton(new ImageIcon(img));
         backButton.setBorderPainted(false);
@@ -87,12 +91,7 @@ public class TestListPanel extends JPanel {
 
 
         backButton.addActionListener(e -> {
-            // Get the parent window (JFrame) that contains this panel
-            Window parentWindow = SwingUtilities.getWindowAncestor(TestListPanel.this);
-            if (parentWindow != null) {
-                parentWindow.dispose(); // Close the current window
-            }
-
+            dispose();
             StudentDashboard Screen = new StudentDashboard(studentId);
             Screen.setVisible(true);
         });

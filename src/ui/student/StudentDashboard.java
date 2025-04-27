@@ -56,7 +56,7 @@ public class StudentDashboard extends JFrame {
         topPanel.setPreferredSize(new Dimension(getWidth(), 150));
 
         // Back button
-        ImageIcon backIcon = new ImageIcon(LoginScreen.class.getClassLoader().getResource("logout.png"));
+        ImageIcon backIcon = new ImageIcon(StudentDashboard.class.getClassLoader().getResource("logout.png"));
         Image img = backIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
         JButton backButton = new JButton(new ImageIcon(img));
         backButton.setBorderPainted(false);
@@ -88,7 +88,7 @@ public class StudentDashboard extends JFrame {
         summaryPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         summaryPanel.add(createSummaryCard("📘 Courses", String.valueOf(courseCount), this::openCourses, "course"));
         summaryPanel.add(createSummaryCard("📝 Tests", String.valueOf(testCount), this::openTests, "test"));
-        summaryPanel.add(createSummaryCard("🎓 Certificates", String.valueOf(certificateCount), null, "certificate"));
+        summaryPanel.add(createSummaryCard("🎓 Certificates", String.valueOf(certificateCount), this::openCertificates, "certificate"));
 
         // Chart Panel (empty for now)
         JPanel chartPanel = new JPanel(new BorderLayout());
@@ -232,22 +232,24 @@ public class StudentDashboard extends JFrame {
         return card;
     }
     private void openCourses() {
-        CourseListPanel courseListPanel = new CourseListPanel(studentId);
-        JFrame courseFrame = new JFrame("Courses");
-        courseFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        courseFrame.setSize(1000, 700);
-        courseFrame.add(courseListPanel);
-        courseFrame.setVisible(true);
         dispose();
+        CourseListPanel courseListPanel = new CourseListPanel(studentId);
+
+        courseListPanel.setVisible(true);
+
+    }
+
+    private void openCertificates() {
+        dispose();
+        StudentCertificate studentCertificate = new StudentCertificate(studentId);
+
+        studentCertificate.setVisible(true);
+
     }
 
     private void openTests() {
-        TestListPanel testListPanel = new TestListPanel(studentId);
-        JFrame testFrame = new JFrame("Test List");
-        testFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        testFrame.setSize(1000, 700);
-        testFrame.add(testListPanel);
-        testFrame.setVisible(true);
         dispose();
+        TestListPanel testListPanel = new TestListPanel(studentId);
+        testListPanel.setVisible(true);
     }
 }

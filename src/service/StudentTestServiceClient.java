@@ -3,6 +3,7 @@ package service;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Map;
 
 import models.StudentTest;
 import rmi.StudentTestRemoteService;
@@ -109,5 +110,15 @@ public class StudentTestServiceClient {
             return -1;
         }
     }
+
+    public List<Map<String, Object>> getStudentTestResults(int studentId) {
+        try{
+            return studentTestService.getStudentTestResults(studentId);
+        }catch (RemoteException e){
+            System.err.println("RemoteException during getStudentTestResults: " + e.getMessage());
+            return null;
+        }
+    }
+
 
 }
