@@ -12,6 +12,8 @@ import org.jfree.data.general.DefaultPieDataset;
 import service.CourseServiceClient;
 import service.StudentTestServiceClient;
 import service.TestServiceClient;
+import ui.auth.LoginScreen;
+import ui.onboarding.OnboardingSlider;
 
 public class ProfessorDashboard extends JFrame {
 
@@ -50,22 +52,53 @@ public class ProfessorDashboard extends JFrame {
             }
         };
         topPanel.setPreferredSize(new Dimension(getWidth(), 150));
-        topPanel.setLayout(new GridLayout(1, 3, 20, 20));
+        topPanel.setLayout(new BorderLayout()); // <--- Change this!
         topPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+// Back button
+        ImageIcon backIcon = new ImageIcon(LoginScreen.class.getClassLoader().getResource("logout.png"));
+        Image img = backIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+        JButton backButton = new JButton(new ImageIcon(img));
+        backButton.setBorderPainted(false);
+        backButton.setContentAreaFilled(false);
+        backButton.setFocusPainted(false);
+        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        backButton.addActionListener(e -> {
+            dispose();
+            LoginScreen screen = new LoginScreen();
+            screen.setVisible(true);
+        });
+
+        JPanel backButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        backButtonPanel.setOpaque(false);
+        backButtonPanel.add(backButton);
+
+// Cards Panel
+        JPanel cardsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10)); // 20px horizontal gap
+        cardsPanel.setOpaque(false);
 
         int courseCount = courseServiceClient.getCourseCountByProfessorId(professorId);
         int testCount = testServiceClient.getTestCountByProfessorId(professorId);
         int certificateCount = studentTestServiceClient.getCertificateCountByProfessorId(professorId);
 
-        topPanel.add(createSummaryCard("📘 Courses", String.valueOf(courseCount), () -> {
+        cardsPanel.add(createSummaryCard("📘 Courses", String.valueOf(courseCount), () -> {
             new ProfessorCourseManager(professorId).setVisible(true);
+            dispose();
         }, "course"));
 
-        topPanel.add(createSummaryCard("📝 Tests", String.valueOf(testCount), () -> {
+        cardsPanel.add(createSummaryCard("📝 Tests", String.valueOf(testCount), () -> {
             new ProfessorTestManager(professorId).setVisible(true);
+            dispose();
         }, "test"));
 
-        topPanel.add(createSummaryCard("🎓 Certificates", String.valueOf(certificateCount), null, "certificate"));
+        cardsPanel.add(createSummaryCard("🎓 Certificates", String.valueOf(certificateCount), null, "certificate"));
+
+// Add panels to topPanel
+        topPanel.add(backButtonPanel, BorderLayout.WEST);
+        topPanel.add(cardsPanel, BorderLayout.CENTER);
+
+
+
 
         // Chart Panel
         JPanel chartPanel = new JPanel(new BorderLayout());

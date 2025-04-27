@@ -4,6 +4,9 @@ import ui.auth.LoginScreen;
 import ui.auth.SignUpScreen;
 
 import javax.swing.*;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
@@ -76,17 +79,22 @@ public class OnboardingSlider extends JFrame {
         title.setFont(new Font("SansSerif", Font.BOLD, 22));
         title.setForeground(new Color(33, 33, 99));
 
-        JTextArea desc = new JTextArea("Explore exciting courses, pass QCM tests, and earn certificates.\nTrack your growth and challenge yourself.");
+        JTextPane desc = new JTextPane();
+        desc.setText("Explore exciting courses, pass QCM tests, and earn certificates.\nTrack your growth and challenge yourself.");
         styleText(desc);
+
         JLabel image = new JLabel(new ImageIcon(
-                OnboardingSlider.class.getClassLoader().getResource("student.png")  // No leading slash
+                OnboardingSlider.class.getClassLoader().getResource("student.png") // No leading slash
         ), SwingConstants.CENTER);
+
         panel.add(title, BorderLayout.NORTH);
         panel.add(image, BorderLayout.CENTER);
         panel.add(desc, BorderLayout.SOUTH);
 
         return panel;
     }
+
+
 
     private JPanel createProfessorSlide() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -96,7 +104,8 @@ public class OnboardingSlider extends JFrame {
         title.setFont(new Font("SansSerif", Font.BOLD, 22));
         title.setForeground(new Color(63, 81, 181));
 
-        JTextArea desc = new JTextArea("As a professor, manage your courses, create QCM tests,\nand evaluate your students' performance.");
+        JTextPane desc = new JTextPane();
+        desc.setText("As a professor, manage your courses, create QCM tests,\nand evaluate your students' performance.");
         styleText(desc);
 
         JLabel image = new JLabel(new ImageIcon(OnboardingSlider.class.getClassLoader().getResource("teacher.png")), SwingConstants.CENTER); // Replace with your uploaded image
@@ -136,6 +145,8 @@ public class OnboardingSlider extends JFrame {
                 new LoginScreen().setVisible(true);
             }
         });
+        // i added this
+
 
         panel.add(title);
         panel.add(studentBtn);
@@ -144,7 +155,10 @@ public class OnboardingSlider extends JFrame {
 
         return panel;
     }
-
+    public void setSlideIndex(int index) {
+        this.slideIndex = index;
+        cardLayout.show(cardPanel, "slide" + slideIndex);
+    }
     private void navigateToSignUp(String role) {
         SignUpScreen signUpScreen = new SignUpScreen(role);
         System.out.println("sent role :"+role);
@@ -152,13 +166,18 @@ public class OnboardingSlider extends JFrame {
         this.setVisible(false);
     }
 
-    private void styleText(JTextArea area) {
-        area.setWrapStyleWord(true);
-        area.setLineWrap(true);
+    private void styleText(JTextPane area) {
         area.setEditable(false);
         area.setOpaque(false);
         area.setFont(new Font("SansSerif", Font.PLAIN, 16));
         area.setMargin(new Insets(20, 30, 20, 30));
+        area.setBackground(new Color(240, 248, 255)); // Match panel background (optional)
+
+        // Center text properly
+        StyledDocument doc = area.getStyledDocument();
+        SimpleAttributeSet center = new SimpleAttributeSet();
+        StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+        doc.setParagraphAttributes(0, doc.getLength(), center, false);
     }
 
     private void styleButton(JButton button, Color bgColor) {
@@ -168,7 +187,7 @@ public class OnboardingSlider extends JFrame {
         button.setFocusPainted(false);
     }
 
-    private void updateButtonColors() {
+        private void updateButtonColors() {
         nextButton.setEnabled(true);
         prevButton.setEnabled(true);
 
@@ -194,6 +213,7 @@ public class OnboardingSlider extends JFrame {
             prevButton.setForeground(Color.WHITE);
         }
     }
+
 
 
 }

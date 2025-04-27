@@ -78,6 +78,9 @@ public class TestScreen extends JFrame {
         bottomPanel.add(nextButton, BorderLayout.SOUTH);
 
         add(bottomPanel, BorderLayout.SOUTH);
+
+
+
     }
 
     private void startTestTimer() {

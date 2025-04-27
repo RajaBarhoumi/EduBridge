@@ -24,8 +24,12 @@ public class UserServiceClient {
         } catch (RemoteException e) {
             System.err.println("RemoteException during register: " + e.getMessage());
             return false;
+        } catch (Exception e) {
+            System.err.println("Error during register: " + e.getMessage());
+            return false;
         }
     }
+
 
     public User login(String email, String password) {
         try {

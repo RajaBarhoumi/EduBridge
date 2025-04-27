@@ -4,8 +4,8 @@ import service.UserServiceClient;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.regex.Pattern;
 
-// In SignUpScreen class
 public class SignUpScreen extends JFrame {
     private String role;
 
@@ -20,7 +20,7 @@ public class SignUpScreen extends JFrame {
         mainPanel.setBackground(new Color(240, 248, 255));
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-        ImageIcon icon = new ImageIcon(SignUpScreen.class.getClassLoader().getResource("login.png")); // Adjust path if needed
+        ImageIcon icon = new ImageIcon(SignUpScreen.class.getClassLoader().getResource("login.png"));
         Image image = icon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
         JLabel imageLabel = new JLabel(new ImageIcon(image));
         imageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -37,7 +37,7 @@ public class SignUpScreen extends JFrame {
         JPasswordField passwordField = styledPasswordField("Password");
 
         JButton registerBtn = new JButton("Sign Up");
-        stylePrimaryButton(registerBtn, new Color(63, 81, 181)); // Deep indigo
+        stylePrimaryButton(registerBtn, new Color(63, 81, 181));
 
         JLabel loginLink = new JLabel("Already have an account? Log in →");
         loginLink.setFont(new Font("SansSerif", Font.ITALIC, 14));
@@ -46,25 +46,50 @@ public class SignUpScreen extends JFrame {
         loginLink.setAlignmentX(Component.CENTER_ALIGNMENT);
         loginLink.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         loginLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        registerBtn.addActionListener(e -> {
-            String name = nameField.getText();
-            String email = emailField.getText();
-            String password = new String(passwordField.getPassword());
 
+        registerBtn.addActionListener(e -> {
+            String name = nameField.getText().trim();
+            String email = emailField.getText().trim();
+            String password = new String(passwordField.getPassword()).trim();
+
+            // Input validation
             if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please fill all fields!", "Input Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "All fields are required!", "Input Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
+            if (!isValidName(name)) {
+                JOptionPane.showMessageDialog(this, "Name must be at least 3 characters and contain only letters and spaces",
+                        "Invalid Name", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid email address",
+                        "Invalid Email", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (!isValidPassword(password)) {
+                JOptionPane.showMessageDialog(this,
+                        "Password must be at least 5 characters and contain at least one letter and one number",
+                        "Weak Password", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // Call the register method from UserServiceClient
             UserServiceClient userServiceClient = new UserServiceClient();
             boolean success = userServiceClient.register(name, email, password, this.role);
 
+            // If the registration failed, check for the specific error
             if (success) {
                 JOptionPane.showMessageDialog(this, "Registration successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 dispose();
                 new LoginScreen().setVisible(true);
             } else {
-                JOptionPane.showMessageDialog(this, "Registration failed. Try again later.", "Error", JOptionPane.ERROR_MESSAGE);
+                // Here, handle the error if the email already exists
+                JOptionPane.showMessageDialog(this, "This email is already registered. Please try a different one.",
+                        "Email Already Exists", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -76,7 +101,6 @@ public class SignUpScreen extends JFrame {
             }
         });
 
-        // Add components
         mainPanel.add(imageLabel);
         mainPanel.add(title);
         mainPanel.add(nameField);
@@ -86,9 +110,27 @@ public class SignUpScreen extends JFrame {
         mainPanel.add(registerBtn);
         mainPanel.add(loginLink);
 
-        // Padding around form
         mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
         add(mainPanel);
+    }
+
+    // Validation methods
+    private boolean isValidName(String name) {
+        // Name should be at least 3 characters and contain only letters and spaces
+        return name.length() >= 3 && Pattern.matches("^[a-zA-Z\\s]+$", name);
+    }
+
+    private boolean isValidEmail(String email) {
+        // Basic email validation regex
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        return Pattern.matches(emailRegex, email);
+    }
+
+    private boolean isValidPassword(String password) {
+        // Password should be at least 8 characters and contain at least one letter and one number
+        return password.length() >= 5 &&
+                Pattern.matches(".*[a-zA-Z].*", password) &&
+                Pattern.matches(".*\\d.*", password);
     }
 
     private JTextField styledTextField(String placeholder) {
@@ -115,6 +157,4 @@ public class SignUpScreen extends JFrame {
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
         button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
     }
-
 }
-

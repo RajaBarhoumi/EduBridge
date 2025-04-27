@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import java.util.List;
 
 import models.Option;
+import models.Question;
 import rmi.OptionRemoteService;
 
 public class OptionServiceClient {
@@ -43,6 +44,16 @@ public class OptionServiceClient {
             return true;
         } catch (RemoteException e) {
             System.err.println("RemoteException during deleteOption: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean updateOption(Option option) {
+        try {
+            optionService.updateOption(option);
+            return true;
+        } catch (RemoteException e) {
+            System.err.println("RemoteException during updateOption: " + e.getMessage());
             return false;
         }
     }
