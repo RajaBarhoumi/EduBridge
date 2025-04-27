@@ -119,24 +119,71 @@ public class ProfessorTestManager extends JFrame {
 
         loadCourses();
     }
+
     private void loadCourses() {
         courseComboBox.removeAllItems();
-        List<Course> courses = courseService.getAllCourses();
+        List<Course> courses = courseService.getCoursesByProfessorId(professorId);
         for (Course course : courses) {
             courseComboBox.addItem(course);
+        }
+    }
+
+
+    private void openQuestionDialog(int testId, boolean isUpdate, Question question) {
+        JTextField contentField = new JTextField(question != null ? question.getContent() : "", 20);
+        JTextField pointsField = new JTextField(question != null ? String.valueOf(question.getPoints()) : "", 5);
+
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        panel.add(new JLabel("Question Content:"));
+        panel.add(contentField);
+        panel.add(new JLabel("Points:"));
+        panel.add(pointsField);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, isUpdate ? "Update Question" : "Add Question", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            if (contentField.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter the question content.", "Input Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            try {
+                int points = Integer.parseInt(pointsField.getText());
+                if (points <= 0) {
+                    JOptionPane.showMessageDialog(this, "Points must be greater than 0.", "Input Error", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                Question newQuestion = new Question();
+                newQuestion.setTestId(testId);
+                newQuestion.setContent(contentField.getText());
+                newQuestion.setPoints(points);
+
+                if (isUpdate && question != null) {
+                    newQuestion.setId(question.getId());
+                    questionService.updateQuestion(newQuestion);
+                } else {
+                    questionService.addQuestion(newQuestion);
+                }
+                loadTests(); // Refresh the tests to display the updated question
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid number for points.", "Input Error", JOptionPane.WARNING_MESSAGE);
+            }
         }
     }
 
     private void openTestDialog(boolean isUpdate, Test test) {
         JTextField titleField = new JTextField(test != null ? test.getTitle() : "", 20);
         JTextField timeLimitField = new JTextField(test != null ? String.valueOf(test.getTimeLimit()) : "", 5);
+
+        // Add input validation for time limit (digits only)
+
+
         JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
         panel.setBorder(new EmptyBorder(10, 10, 10, 10));
         panel.add(new JLabel("Test Title:"));
         panel.add(titleField);
         panel.add(new JLabel("Time Limit (mins):"));
         panel.add(timeLimitField);
-//        panel.add(new JLabel("Max Attempts:"));
 
         int result = JOptionPane.showConfirmDialog(this, panel, isUpdate ? "Update Test" : "Add Test", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
@@ -146,24 +193,35 @@ public class ProfessorTestManager extends JFrame {
                 return;
             }
 
-            Test newTest = new Test();
-            newTest.setCourseId(selectedCourse.getId());
-            newTest.setTitle(titleField.getText());
-            newTest.setProfessorId(professorId);
-            try {
-                newTest.setTimeLimit(Integer.parseInt(timeLimitField.getText()));
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Please enter valid numeric values.");
+            // Validate time limit
+            if (timeLimitField.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter a time limit.", "Input Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            if (isUpdate && test != null) {
-                newTest.setId(test.getId());
-                testService.updateTest(newTest);
-            } else {
-                testService.createTest(newTest);
+            try {
+                int timeLimit = Integer.parseInt(timeLimitField.getText());
+                if (timeLimit <= 0) {
+                    JOptionPane.showMessageDialog(this, "Time limit must be greater than 0.", "Input Error", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                Test newTest = new Test();
+                newTest.setCourseId(selectedCourse.getId());
+                newTest.setTitle(titleField.getText());
+                newTest.setProfessorId(professorId);
+                newTest.setTimeLimit(timeLimit);
+
+                if (isUpdate && test != null) {
+                    newTest.setId(test.getId());
+                    testService.updateTest(newTest);
+                } else {
+                    testService.createTest(newTest);
+                }
+                loadTests();
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid number for time limit.", "Input Error", JOptionPane.WARNING_MESSAGE);
             }
-            loadTests();
         }
     }
 
@@ -209,6 +267,10 @@ public class ProfessorTestManager extends JFrame {
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         titleLabel.setForeground(PRIMARY_COLOR);
 
+        JLabel timeLabel = new JLabel("Time Limit: " + test.getTimeLimit() + " mins");
+        timeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        timeLabel.setForeground(new Color(117, 117, 117));
+
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
         buttonPanel.setBackground(CARD_BACKGROUND);
         JButton updateBtn = createStyledButton("Update", ACCENT_COLOR);
@@ -225,36 +287,39 @@ public class ProfessorTestManager extends JFrame {
         buttonPanel.add(Box.createHorizontalStrut(5));
         buttonPanel.add(addQuestionBtn);
 
-        header.add(titleLabel, BorderLayout.WEST);
+        JPanel titlePanel = new JPanel(new BorderLayout());
+        titlePanel.add(titleLabel, BorderLayout.NORTH);
+        titlePanel.add(timeLabel, BorderLayout.SOUTH);
+        titlePanel.setBackground(CARD_BACKGROUND);
+
+        header.add(titlePanel, BorderLayout.WEST);
         header.add(buttonPanel, BorderLayout.EAST);
 
+        // Questions panel - now always visible
         JPanel questionsContent = new JPanel();
         questionsContent.setLayout(new BoxLayout(questionsContent, BoxLayout.Y_AXIS));
         questionsContent.setBackground(CARD_BACKGROUND);
 
         List<Question> questions = questionService.getQuestionsByTest(test.getId());
-        for (Question question : questions) {
-            questionsContent.add(createQuestionPanel(test.getId(), question));
-            questionsContent.add(Box.createVerticalStrut(15));
+        if (!questions.isEmpty()) {
+            JLabel questionsTitle = new JLabel("Questions:");
+            questionsTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            questionsTitle.setBorder(new EmptyBorder(10, 0, 10, 0));
+            questionsContent.add(questionsTitle);
+
+            for (Question question : questions) {
+                questionsContent.add(createQuestionPanel(test.getId(), question));
+                questionsContent.add(Box.createVerticalStrut(10));
+            }
         }
 
         // Make questions scrollable
         JScrollPane questionsScrollPane = new JScrollPane(questionsContent);
         questionsScrollPane.setBorder(null);
         questionsScrollPane.setPreferredSize(new Dimension(0, Math.min(questions.size() * 100, 300)));
-        questionsScrollPane.setVisible(false);
-
-        JButton toggleBtn = createStyledButton("▼ Show Questions", new Color(96, 125, 139));
-        toggleBtn.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        toggleBtn.addActionListener(e -> {
-            questionsScrollPane.setVisible(!questionsScrollPane.isVisible());
-            toggleBtn.setText(questionsScrollPane.isVisible() ? "▲ Hide Questions" : "▼ Show Questions");
-            card.revalidate();
-        });
 
         card.add(header, BorderLayout.NORTH);
         card.add(questionsScrollPane, BorderLayout.CENTER);
-        card.add(toggleBtn, BorderLayout.SOUTH);
 
         return card;
     }
@@ -274,11 +339,28 @@ public class ProfessorTestManager extends JFrame {
         deleteQuestionBtn.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         deleteQuestionBtn.addActionListener(e -> deleteQuestion(testId, question.getId()));
 
+        JButton updateQuestionBtn = createStyledButton("Update", ACCENT_COLOR);
+        updateQuestionBtn.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        updateQuestionBtn.addActionListener(e -> openQuestionDialog(testId, true, question));
+
+        JButton addOptionBtn = createStyledButton("+ Add Option", SUCCESS_COLOR);
+        addOptionBtn.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        addOptionBtn.addActionListener(e -> openOptionDialog(question.getId(), null));
+
+        // Panel for the question header (label + buttons)
         JPanel questionHeader = new JPanel(new BorderLayout());
         questionHeader.setBackground(new Color(249, 249, 249));
         questionHeader.add(questionLabel, BorderLayout.WEST);
-        questionHeader.add(deleteQuestionBtn, BorderLayout.EAST);
 
+        // Button panel with Update, Delete, and Add Option buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+        buttonPanel.setBackground(new Color(249, 249, 249));
+        buttonPanel.add(updateQuestionBtn);
+        buttonPanel.add(deleteQuestionBtn);
+        buttonPanel.add(addOptionBtn);  // Added Add Option button here
+        questionHeader.add(buttonPanel, BorderLayout.EAST);
+
+        // Options section (same as before)
         JPanel optionsContent = new JPanel();
         optionsContent.setLayout(new BoxLayout(optionsContent, BoxLayout.Y_AXIS));
         optionsContent.setBackground(new Color(249, 249, 249));
@@ -300,14 +382,9 @@ public class ProfessorTestManager extends JFrame {
         optionsScrollPane.setBorder(null);
         optionsScrollPane.setPreferredSize(new Dimension(0, Math.min((options != null ? options.size() : 0) * 40, 150)));
 
-        JButton addOptionBtn = createStyledButton("+ Add Option", SUCCESS_COLOR);
-        addOptionBtn.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        addOptionBtn.addActionListener(e -> openOptionDialog(question.getId()));
-
         JPanel optionsPanel = new JPanel(new BorderLayout());
         optionsPanel.setBackground(new Color(249, 249, 249));
         optionsPanel.add(optionsScrollPane, BorderLayout.CENTER);
-        optionsPanel.add(addOptionBtn, BorderLayout.SOUTH);
         optionsPanel.setBorder(new EmptyBorder(10, 20, 0, 0));
 
         questionPanel.add(questionHeader, BorderLayout.NORTH);
@@ -319,21 +396,28 @@ public class ProfessorTestManager extends JFrame {
     private JPanel createOptionPanel(int questionId, Option option) {
         JPanel optionPanel = new JPanel(new BorderLayout());
         optionPanel.setBackground(Color.WHITE);
-        optionPanel.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(BORDER_COLOR, 1),
-                new EmptyBorder(5, 10, 5, 10)
-        ));
+        optionPanel.setBorder(new EmptyBorder(2, 10, 2, 10));
 
-        JLabel optionLabel = new JLabel("<html>" + option.getContent() +
-                (option.isCorrect() ? " <font color='#388E3C'>(Correct)</font>" : "") + "</html>");
-        optionLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        // Display the option content and whether it's correct or not
+        JLabel optionLabel = new JLabel(option.getContent() + (option.isCorrect() ? " (Correct)" : ""));
+        optionLabel.setFont(new Font("Arial", Font.PLAIN, 12));
 
-        JButton deleteOptionBtn = createStyledButton("Delete", DANGER_COLOR);
-        deleteOptionBtn.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        // Button to delete the option
+        JButton deleteOptionBtn = createStyledButton("Delete", new Color(244, 67, 54));
         deleteOptionBtn.addActionListener(e -> deleteOption(questionId, option.getId()));
 
-        optionPanel.add(optionLabel, BorderLayout.WEST);
-        optionPanel.add(deleteOptionBtn, BorderLayout.EAST);
+        // Button to update the option
+        JButton updateOptionBtn = createStyledButton("Update", new Color(33, 150, 243));  // Blue color for update
+        updateOptionBtn.addActionListener(e -> openOptionDialog(questionId, option));  // Open the update dialog
+
+        // Create a panel to hold the buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(deleteOptionBtn);
+        buttonPanel.add(updateOptionBtn);
+
+        // Add the option label and button panel to the main panel
+        optionPanel.add(optionLabel, BorderLayout.CENTER);
+        optionPanel.add(buttonPanel, BorderLayout.EAST);
 
         return optionPanel;
     }
@@ -350,175 +434,94 @@ public class ProfessorTestManager extends JFrame {
         return button;
     }
 
-//    private void openQuestionDialog(int testId) {
-//        JDialog dialog = new JDialog(this, "Add Question", true);
-//        dialog.setSize(450, 200);
-//        dialog.setLocationRelativeTo(this);
-//        dialog.setLayout(new BorderLayout());
-//
-//        JPanel panel = new JPanel(new GridBagLayout());
-//        panel.setBorder(new EmptyBorder(20, 20, 20, 20));
-//        panel.setBackground(SECONDARY_COLOR);
-//
-//        GridBagConstraints gbc = new GridBagConstraints();
-//        gbc.insets = new Insets(5, 5, 15, 5);
-//        gbc.anchor = GridBagConstraints.WEST;
-//        gbc.fill = GridBagConstraints.HORIZONTAL;
-//
-//        JLabel contentLabel = new JLabel("Question:");
-//        contentLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-//        JTextField contentField = new JTextField(20);
-//        contentField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-//
-//        JLabel pointsLabel = new JLabel("Points:");
-//        pointsLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-//        JTextField pointsField = new JTextField(5);
-//        pointsField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-//
-//        gbc.gridx = 0;
-//        gbc.gridy = 0;
-//        panel.add(contentLabel, gbc);
-//
-//        gbc.gridy = 1;
-//        gbc.gridwidth = 2;
-//        panel.add(contentField, gbc);
-//
-//        gbc.gridy = 2;
-//        gbc.gridwidth = 1;
-//        panel.add(pointsLabel, gbc);
-//
-//        gbc.gridx = 1;
-//        panel.add(pointsField, gbc);
-//
-//        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-//        buttonPanel.setBackground(SECONDARY_COLOR);
-//
-//        JButton cancelBtn = createStyledButton("Cancel", new Color(158, 158, 158));
-//        cancelBtn.addActionListener(e -> dialog.dispose());
-//
-//        JButton saveBtn = createStyledButton("Save", PRIMARY_COLOR);
-//        saveBtn.addActionListener(e -> {
-//            String content = contentField.getText().trim();
-//            String pointsText = pointsField.getText().trim();
-//
-//            if (content.isEmpty() || pointsText.isEmpty()) {
-//                JOptionPane.showMessageDialog(dialog, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
-//                return;
-//            }
-//
-//            try {
-//                int points = Integer.parseInt(pointsText);
-//
-//                Question question = new Question();
-//                question.setContent(content);
-//                question.setPoints(points);
-//                question.setTestId(testId);
-//
-//                boolean success = questionService.addQuestion(question);
-//                if (success) {
-//                    JOptionPane.showMessageDialog(dialog, "Question added successfully!");
-//                    loadTests();
-//                    dialog.dispose();
-//                } else {
-//                    JOptionPane.showMessageDialog(dialog, "Failed to add question.", "Error", JOptionPane.ERROR_MESSAGE);
-//                }
-//            } catch (NumberFormatException ex) {
-//                JOptionPane.showMessageDialog(dialog, "Points must be a number.", "Error", JOptionPane.ERROR_MESSAGE);
-//            }
-//        });
-//
-//        buttonPanel.add(cancelBtn);
-//        buttonPanel.add(saveBtn);
-//
-//        dialog.add(panel, BorderLayout.CENTER);
-//        dialog.add(buttonPanel, BorderLayout.SOUTH);
-//        dialog.setVisible(true);
-//    }
-//start
-private void openQuestionDialog(int testId) {
-    JTextField contentField = new JTextField(20);
-    JTextField pointsField = new JTextField(5);
-
-    JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
-    panel.add(new JLabel("Question Content:"));
-    panel.add(contentField);
-    panel.add(new JLabel("Points:"));
-    panel.add(pointsField);
-
-    int result = JOptionPane.showConfirmDialog(this, panel, "Add Question",
-            JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-
-    if (result == JOptionPane.OK_OPTION) {
-        String content = contentField.getText().trim();
-        String pointsText = pointsField.getText().trim();
-
-        if (content.isEmpty() || pointsText.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        try {
-            int points = Integer.parseInt(pointsText);
-
-            Question question = new Question();
-            question.setContent(content);
-            question.setPoints(points);
-            question.setTestId(testId);
-
-            boolean success = questionService.addQuestion(question);
-            if (success) {
-                JOptionPane.showMessageDialog(this, "Question added successfully!");
-                loadTests(); // Refresh UI
-            } else {
-                JOptionPane.showMessageDialog(this, "Failed to add question.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Points must be a number.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-}
-
-    //end
-    private void openOptionDialog(int questionId) {
+    private void openQuestionDialog(int testId) {
         JTextField contentField = new JTextField(20);
-        JCheckBox correctCheck = new JCheckBox("Is Correct?");
-        JPanel panel = new JPanel(new GridLayout(2, 1));
-        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
-        panel.add(contentField);
-        panel.add(correctCheck);
+        JTextField pointsField = new JTextField(5);
 
-        int result = JOptionPane.showConfirmDialog(this, panel, "Add Option", JOptionPane.OK_CANCEL_OPTION);
-        if (result == JOptionPane.OK_OPTION && !contentField.getText().trim().isEmpty()) {
-            Option option = new Option();
-            option.setQuestionId(questionId);
-            option.setContent(contentField.getText());
-            option.setCorrect(correctCheck.isSelected());
+
+
+        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+        panel.add(new JLabel("Question Content:"));
+        panel.add(contentField);
+        panel.add(new JLabel("Points:"));
+        panel.add(pointsField);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, "Add Question",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+        if (result == JOptionPane.OK_OPTION) {
+            String content = contentField.getText().trim();
+            String pointsText = pointsField.getText().trim();
+
+            if (content.isEmpty() || pointsText.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
             try {
-                boolean success = optionService.addOption(option);
+                int points = Integer.parseInt(pointsText);
+                if (points <= 0) {
+                    JOptionPane.showMessageDialog(this, "Points must be greater than 0.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                Question question = new Question();
+                question.setContent(content);
+                question.setPoints(points);
+                question.setTestId(testId);
+
+                boolean success = questionService.addQuestion(question);
                 if (success) {
-                    JOptionPane.showMessageDialog(this, "Option added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                    loadTests();
-                }
-            } catch (Exception e) {
-                if (e.getMessage().contains("Only one correct option is allowed")) {
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Cannot add another correct option. This question already has a correct option. Please edit or delete the existing correct option first.",
-                            "Multiple Correct Options Error",
-                            JOptionPane.ERROR_MESSAGE
-                    );
+                    JOptionPane.showMessageDialog(this, "Question added successfully!");
+                    loadTests(); // Refresh UI
                 } else {
-                    JOptionPane.showMessageDialog(
-                            this,
-                            "Failed to add option: " + e.getMessage(),
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE
-                    );
+                    JOptionPane.showMessageDialog(this, "Failed to add question.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Points must be a number.", "Error", JOptionPane.ERROR_MESSAGE);
             }
-        } else if (contentField.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Option content cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void openOptionDialog(int questionId, Option option) {
+        // Initialize the content field with existing content (if option is not null)
+        JTextField contentField = new JTextField(option != null ? option.getContent() : "", 20);
+        JCheckBox correctCheckBox = new JCheckBox("Correct", option != null && option.isCorrect());
+
+        // Panel to collect the option content and correctness status
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        panel.add(new JLabel("Option Content:"));
+        panel.add(contentField);
+        panel.add(new JLabel("Is Correct:"));
+        panel.add(correctCheckBox);
+
+        // Show the dialog
+        int result = JOptionPane.showConfirmDialog(this, panel, option == null ? "Add Option" : "Update Option", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            String content = contentField.getText();
+            boolean isCorrect = correctCheckBox.isSelected();
+
+            // Validate input
+            if (content.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter option content.", "Input Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            Option updatedOption = new Option();
+            updatedOption.setQuestionId(questionId);
+            updatedOption.setContent(content);
+            updatedOption.setCorrect(isCorrect);
+
+            // Update or add the option
+            if (option != null) {
+                updatedOption.setId(option.getId());  // Preserve the ID if it's an update
+                optionService.updateOption(updatedOption);
+            } else {
+                optionService.addOption(updatedOption);  // Add a new option
+            }
+
+            loadTests();  // Reload the test and options
         }
     }
 

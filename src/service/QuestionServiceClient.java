@@ -46,4 +46,16 @@ public class QuestionServiceClient {
             return false;
         }
     }
+
+    public boolean updateQuestion(Question question) {
+        try {
+            questionService.updateQuestion(question);
+            return true;
+        } catch (RemoteException e) {
+            System.err.println("RemoteException during updateQuestion: " + e.getMessage());
+            return false;
+        }
+    }
+
+
 }
